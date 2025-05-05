@@ -59,14 +59,18 @@ class JumpingSquareGame:
         self.score_label = tk.Label(self.game_frame, text=f"Score: {self.score}", font=("Arial", 14), fg="blue")
         self.score_label.place(x=10, y=10)
 
-        self.instructions_label = tk.Label(self.game_frame, text="Use W to Jump, A to Move Left, D to Move Right, S to Fly, E to Stop Flying", font=("Arial", 12), fg="white")
+        self.instructions_label = tk.Label(
+            self.game_frame,
+            text="Use ↑ to Fly Up, ↓ to Fly Down, ← to Move Left, → to Move Right, Press W to Jump",
+            font=("Arial", 12), fg="white", bg="black"
+        )
         self.instructions_label.pack(pady=10)
 
+        self.root.bind("<Left>", self.move_left)
+        self.root.bind("<Right>", self.move_right)
+        self.root.bind("<Up>", self.fly)
+        self.root.bind("<Down>", self.stop_flying)
         self.root.bind("<KeyPress-w>", self.jump)
-        self.root.bind("<KeyPress-a>", self.move_left)
-        self.root.bind("<KeyPress-d>", self.move_right)
-        self.root.bind("<KeyPress-s>", self.fly)
-        self.root.bind("<KeyPress-e>", self.stop_flying)
         self.root.bind("<F11>", self.toggle_full_screen)
 
         self.game_loop()
@@ -85,9 +89,13 @@ class JumpingSquareGame:
 
     def move_left(self, event):
         self.canvas.move(self.player, -20, 0)
+        self.canvas.move(self.mouth, -20, 0)
+        self.canvas.move(self.tongue, -20, 0)
 
     def move_right(self, event):
         self.canvas.move(self.player, 20, 0)
+        self.canvas.move(self.mouth, 20, 0)
+        self.canvas.move(self.tongue, 20, 0)
 
     def jump(self, event):
         current_coords = self.canvas.coords(self.player)
@@ -130,14 +138,9 @@ class JumpingSquareGame:
         player_coords = self.canvas.coords(self.player)
         star_coords = self.canvas.coords(self.star)
 
-        if player_coords[0] < star_coords[0]:
-            self.canvas.move(self.star, -5, 0)
-        elif player_coords[0] > star_coords[0]:
-            self.canvas.move(self.star, 5, 0)
-        if player_coords[1] < star_coords[1]:
-            self.canvas.move(self.star, 0, -5)
-        elif player_coords[1] > star_coords[1]:
-            self.canvas.move(self.star, 0, 5)
+        dx = 5 if player_coords[0] > star_coords[0] else -5 if player_coords[0] < star_coords[0] else 0
+        dy = 5 if player_coords[1] > star_coords[1] else -5 if player_coords[1] < star_coords[1] else 0
+        self.canvas.move(self.star, dx, dy)
 
     def create_new_star(self):
         x = random.randint(100, 700)
@@ -148,14 +151,9 @@ class JumpingSquareGame:
         player_coords = self.canvas.coords(self.player)
         enemy_coords = self.canvas.coords(self.enemy)
 
-        if player_coords[0] < enemy_coords[0]:
-            self.canvas.move(self.enemy, -5, 0)
-        elif player_coords[0] > enemy_coords[0]:
-            self.canvas.move(self.enemy, 5, 0)
-        if player_coords[1] < enemy_coords[1]:
-            self.canvas.move(self.enemy, 0, -5)
-        elif player_coords[1] > enemy_coords[1]:
-            self.canvas.move(self.enemy, 0, 5)
+        dx = 5 if player_coords[0] > enemy_coords[0] else -5 if player_coords[0] < enemy_coords[0] else 0
+        dy = 5 if player_coords[1] > enemy_coords[1] else -5 if player_coords[1] < enemy_coords[1] else 0
+        self.canvas.move(self.enemy, dx, dy)
 
     def create_new_enemy(self):
         x = random.randint(100, 700)
@@ -172,13 +170,19 @@ class JumpingSquareGame:
 
     def respawn_player(self):
         self.canvas.coords(self.player, 375, 500, 425, 550)
+        self.canvas.coords(self.mouth, 385, 525, 415, 540)
+        self.canvas.coords(self.tongue, 400, 550, 400, 550)
         self.score = 0
 
     def fly(self, event):
         self.canvas.move(self.player, 0, -10)
+        self.canvas.move(self.mouth, 0, -10)
+        self.canvas.move(self.tongue, 0, -10)
 
     def stop_flying(self, event):
         self.canvas.move(self.player, 0, 10)
+        self.canvas.move(self.mouth, 0, 10)
+        self.canvas.move(self.tongue, 0, 10)
 
     def display_win_message(self):
         win_window = tk.Toplevel(self.root)
